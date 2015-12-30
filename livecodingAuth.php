@@ -110,7 +110,7 @@ if(!class_exists('LivecodingAuth')) {
 
     public function refreshToken() {
       $res = $this->post_url_contents("https://www.livecoding.tv/o/token/", [
-        "refresh_token" => $this->$refresh_token,
+        "refresh_token" => $this->refresh_token,
         "grant_type" => "refresh_token",
       ], [
         "Cache-Control: no-cache",
