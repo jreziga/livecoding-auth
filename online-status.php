@@ -10,10 +10,33 @@
 require('livecodingAuth.php');
 
 
-$CLIENT_ID     = getenv('LCTV_CLIENT_ID') ;
-$CLIENT_SECRET = getenv('LCTV_CLIENT_SECRET') ;
-$REDIRECT_URL  = getenv('LCTV_REDIRECT_URL');
+$CLIENT_ID     = getenv('LCTV_CLIENT_ID');
+$CLIENT_SECRET = getenv('LCTV_CLIENT_SECRET');
+$REDIRECT_URL  = $_SERVER['REQUEST_URI'];
 $lctv_user     = htmlspecialchars($_GET['channel']);
+
+
+function fetchData($LivecodingAuth) {
+
+  // reload tokens from storage
+  $LivecodingAuth->setTokens($_SESSION['tokens']);
+
+  // Retrieve some data:
+  $data = $LivecodingAuth->request("v1/livestreams/$lctv_user/");
+
+var_dump($data) ;
+
+  $is_online = $data->is_live;
+
+echo "$channel is " . (($is_online) ? 'online' : 'offline') ;
+
+  // Refresh the token (which expire 10 hours after creation)
+  $LivecodingAuth->refreshToken();
+
+  // Save new tokens
+  $_SESSION['tokens'] = $LivecodingAuth->getTokens();
+
+}
 
 
 session_start();
@@ -26,36 +49,21 @@ else $_SESSION['channel'] = $lctv_user;
 // instantiate auth helper
 $LivecodingAuth = new LivecodingAuth($CLIENT_ID, $CLIENT_SECRET, $REDIRECT_URL);
 
-// reload tokens from storage
+// Check the session hash for existing tokens
 if (isset($_SESSION['tokens'])) { // Here we are fully authorized from a previous request
 
-  $LivecodingAuth->setTokens($_SESSION['tokens']);
-
-  // Retrieve some data:
-  $data = $LivecodingAuth->request("v1/livestreams/$lctv_user/");
-
-var_dump($data) ;
-
-  $is_online =  $data->is_live;
-
-echo "is_online=$is_online";
-
-  // Refresh the token (which expire 10 hours after creation)
-  $LivecodingAuth->refreshToken();
-
-  // Save new tokens
-  $_SESSION['tokens'] = $LivecodingAuth->getTokens();
+  fetchData($LivecodingAuth);
 
 }
 
-// Here we are returning from user auth approval link
 else if (isset($_GET['state'])                   &&
          $_GET['state'] == $_SESSION['state']    &&
-         $LivecodingAuth->checkCode($_GET['code'])) {
+         $LivecodingAuth->checkCode($_GET['code'])) { // Here we are returning from user auth approval link
 
   // Load new access token (this should only need to happen once)
   $_SESSION['tokens'] = $LivecodingAuth->getTokens();
 
+  fetchData($LivecodingAuth);
 }
 
 else { // Here we are not yet authorized (first visit)
@@ -69,6 +77,8 @@ else { // Here we are not yet authorized (first visit)
   echo "<a href=\"$authLink\">Connect my account</a><br/>" ;
   echo "$authLink<br/>";
 
+  // Here we die and wait for the user to click the link above
+  //   which will result in another request for this script.
 }
 
 ?>
