@@ -29,7 +29,7 @@ function fetchData($LivecodingAuth, $lctv_user) {
   // Retrieve some data:
   $data = $LivecodingAuth->request("livestreams/$lctv_user/");
 
-  var_dump($lctv_user, $data) ;
+  var_dump($data) ;
 
   $is_online = $data->is_live;
 
