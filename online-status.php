@@ -9,22 +9,27 @@
 **/
 require('livecodingAuth.php');
 
+session_start();
 
 $CLIENT_ID     = getenv('LCTV_CLIENT_ID');
 $CLIENT_SECRET = getenv('LCTV_CLIENT_SECRET');
-$REDIRECT_URL  = $_SERVER['REQUEST_URI'];
-$lctv_user     = htmlspecialchars($_GET['channel']);
+$REDIRECT_URL  = getenv('LCTV_REDIRECT_URL');
+$lctv_user =    (isset($_SESSION['channel']))
+                  ? $_SESSION['channel']
+                  : (isset($_GET['channel']))
+                    ? htmlspecialchars($_GET['channel'])
+                    : null ;
 
 
-function fetchData($LivecodingAuth) {
+function fetchData($LivecodingAuth, $lctv_user) {
 
   // reload tokens from storage
   $LivecodingAuth->setTokens($_SESSION['tokens']);
 
   // Retrieve some data:
-  $data = $LivecodingAuth->request("v1/livestreams/$lctv_user/");
+  $data = $LivecodingAuth->request("livestreams/$lctv_user/");
 
-var_dump($data) ;
+  var_dump($lctv_user, $data) ;
 
   $is_online = $data->is_live;
 
@@ -39,8 +44,6 @@ echo "$channel is " . (($is_online) ? 'online' : 'offline') ;
 }
 
 
-session_start();
-
 // validate channel name param
 $INVALID_CHANNEL_MSG = "You must specify a channel name like online-status.php?channel=my-channel" ;
 if (empty($lctv_user)) { echo $INVALID_CHANNEL_MSG; exit ; }
@@ -52,7 +55,7 @@ $LivecodingAuth = new LivecodingAuth($CLIENT_ID, $CLIENT_SECRET, $REDIRECT_URL);
 // Check the session hash for existing tokens
 if (isset($_SESSION['tokens'])) { // Here we are fully authorized from a previous request
 
-  fetchData($LivecodingAuth);
+  fetchData($LivecodingAuth, $lctv_user);
 
 }
 
@@ -63,7 +66,7 @@ else if (isset($_GET['state'])                   &&
   // Load new access token (this should only need to happen once)
   $_SESSION['tokens'] = $LivecodingAuth->getTokens();
 
-  fetchData($LivecodingAuth);
+  fetchData($LivecodingAuth, $lctv_user);
 }
 
 else { // Here we are not yet authorized (first visit)
