@@ -24,33 +24,12 @@ define("CHANNEL_NAME", (isset($_SESSION['channel']))
 define('CHANNEL_DATA_PATH', 'livestreams/' . CHANNEL_NAME . '/');
 define('INVALID_CHANNEL_MSG', 'You must specify a channel name like: online-status.php?channel=my-channel .');
 
-if (isset($DEBUG)) {
-  echo "isset(_SESSION['channel'])=" . (isset($_SESSION['channel'])) ? "yes" : "no") . "<br/>";
-  echo "lctv_user=$lctv_user<br/>";
-  var_dump($_SESSION);
-}
-
-function presentOnlineStatus($data) {
-  $is_online = $data->is_live;
-
-  echo CHANNEL_NAME . " is " . (($is_online) ? 'online' : 'offline') ;
-}
-
-function presentAuthLink($auth_link) {
-  // Display a link for the user to authorize the app with this script as the redirect URL
-  echo "This app is not yet authorized. Use the link or URL below to authorize it.<br/>";
-  echo "<a href=\"$auth_link\">Connect my account</a><br/>" ;
-  echo "$auth_link<br/>";
-}
-
 
 // Validate channel name param
-if (empty(constant('CHANNEL_NAME'))) {
+if (empty(constant('CHANNEL_NAME')))
   die(INVALID_CHANNEL_MSG);
-}
-else {
+else
   $_SESSION['channel'] = CHANNEL_NAME;
-}
 
 // Instantiate auth helper
 try {
@@ -60,20 +39,31 @@ catch(Exception $ex) {
   die($ex->getMessage());
 }
 
+// Check for previous authorization
 if (!$LivecodingAuth->getIsAuthorized()) {
-  // Present link for user manual auth
-  presentAuthLink($LivecodingAuth->getAuthLink());
+
+  // Here we have not yet been authorized
+
+  // Display a link for the user to authorize the app with this script as the redirect URL
+  $auth_link = $LivecodingAuth->getAuthLink();
+  echo "This app is not yet authorized. Use the link or URL below to authorize it.<br/>";
+  echo "<a href=\"$auth_link\">Connect my account</a><br/>" ;
 
   // Here we wait for the user to click the authorization link
   //   which will result in another request for this page
-  //   and $LivecodingAuth->getIsAuthorized() should then be true.
+  //   with $LivecodingAuth->getIsAuthorized() then returning true.
+
 } else {
 
-  // Fetch some data
+  // Here we are authorized from a previous request
+
+  // Fetch some data from the API
   $data = $LivecodingAuth->fetchData($LivecodingAuth, CHANNEL_STATUS_DATA_PATH);
 
   // Present the data
-  presentOnlineStatus($data);
+  $is_online = $data->is_live;
+  echo CHANNEL_NAME . " is " . (($is_online) ? 'online' : 'offline') ;
+
 }
 
 ?>
