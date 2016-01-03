@@ -60,13 +60,13 @@ if(!class_exists('LivecodingAuth')) {
         $this->tokens = new LivecodingAuthTokensText();
       else // ($storage == SESSION_STORE)
         $this->tokens = new LivecodingAuthTokensSession();
-      $this->getAuthLink = 'https://www.livecoding.tv/o/authorize/?'.
+      $this->auth_link = 'https://www.livecoding.tv/o/authorize/?'.
         'scope='.$this->scope.'&'.
         'state='.$this->state.'&'.
         'redirect_uri='.$this->redirect_url.'&'.
         'response_type=code&'.
         'client_id='.$this->client_id;
-      $this->tokenReqHeaders = [
+      $this->token_req_headers = [
         "Cache-Control: no-cache",
         "Pragma: no-cache",
         'Authorization: Basic '.base64_encode($this->client_id.':'.$this->client_secret),
@@ -132,7 +132,7 @@ if(!class_exists('LivecodingAuth')) {
      * @return string - The URL for manual user authorization
      */
     public function getAuthLink() {
-      return $this->getAuthLink;
+      return $this->auth_link;
     } // getAuthLink
 
     /**

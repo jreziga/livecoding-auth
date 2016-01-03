@@ -16,11 +16,12 @@ session_start();
 define("CLIENT_ID", getenv('LCTV_CLIENT_ID'));
 define("CLIENT_SECRET", getenv('LCTV_CLIENT_SECRET'));
 define("REDIRECT_URL", getenv('LCTV_REDIRECT_URL'));
-define("CHANNEL_NAME", (isset($_SESSION['channel']))
-                       ? $_SESSION['channel']
-                       : (isset($_GET['channel']))
-                         ? htmlspecialchars($_GET['channel'])
-                         : null);
+if(isset($_SESSION['channel']))
+  define("CHANNEL_NAME", $_SESSION['channel']);
+else if (isset($_GET['channel']))
+  define("CHANNEL_NAME", htmlspecialchars($_GET['channel']));
+else
+  define("CHANNEL_NAME", null);
 define('CHANNEL_DATA_PATH', 'livestreams/' . CHANNEL_NAME . '/');
 define('INVALID_CHANNEL_MSG', 'You must specify a channel name like: example.php?channel=my-channel .');
 
