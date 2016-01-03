@@ -22,18 +22,20 @@ define("CHANNEL_NAME", (isset($_SESSION['channel']))
                          ? htmlspecialchars($_GET['channel'])
                          : null);
 define('CHANNEL_DATA_PATH', 'livestreams/' . CHANNEL_NAME . '/');
-define('INVALID_CHANNEL_MSG', 'You must specify a channel name like: online-status.php?channel=my-channel .');
+define('INVALID_CHANNEL_MSG', 'You must specify a channel name like: example.php?channel=my-channel .');
 
 
 // Validate channel name param
-if (empty(constant('CHANNEL_NAME')))
+$CHANNEL_NAME = CHANNEL_NAME;
+if (empty( $CHANNEL_NAME ))
   die(INVALID_CHANNEL_MSG);
 else
   $_SESSION['channel'] = CHANNEL_NAME;
+unset($CHANNEL_NAME);
 
 // Instantiate auth helper
 try {
-  $LivecodingAuth = new LivecodingAuth($CLIENT_ID, $CLIENT_SECRET, $REDIRECT_URL);
+  $LivecodingAuth = new LivecodingAuth(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL);
 }
 catch(Exception $ex) {
   die($ex->getMessage());
@@ -58,7 +60,7 @@ if (!$LivecodingAuth->getIsAuthorized()) {
   // Here we are authorized from a previous request
 
   // Fetch some data from the API
-  $data = $LivecodingAuth->fetchData($LivecodingAuth, CHANNEL_STATUS_DATA_PATH);
+  $data = $LivecodingAuth->fetchData('livestreams/'.$_SESSION['channel'].'/', CHANNEL_STATUS_DATA_PATH);
 
   // Present the data
   $is_online = $data->is_live;

@@ -1,9 +1,9 @@
 <?php
 
-define('CURL_NOT_FOUND_MSG', 'This library requires that curl be available on this server.') ;
-define('INVALID_CLIENT_ID_MSG', 'You must specify a client ID.' ;
-define('INVALID_CLIENT_SECRET_MSG', 'You must specify a client secret.' ;
-define('INVALID_REDIRECT_URL_MSG', 'You must specify a redirect URL.' ;
+define('CURL_NOT_FOUND_MSG', 'This library requires that curl be available on this server.');
+define('INVALID_CLIENT_ID_MSG', 'You must specify a client ID.');
+define('INVALID_CLIENT_SECRET_MSG', 'You must specify a client secret.');
+define('INVALID_REDIRECT_URL_MSG', 'You must specify a redirect URL.');
 define('LCTV_TOKEN_URL', 'https://www.livecoding.tv/o/token/');
 define('LCTV_API_URL', 'https://www.livecoding.tv:443/api/');
 define("READ_SCOPE", 'read');                // Read basic public profile information
@@ -89,7 +89,7 @@ if(!class_exists('LivecodingAuth')) {
 
         // Nothing to do - yay
       }
-      else if (isset($_GET['state']) && $_GET['state'] == $this->tokens->getState()) {
+      else if (isset($_GET['state']) && $_GET['state'] == $this->tokens->getState() ) {
         // Here we are returning from user auth approval link
         $this->fetchTokens($_GET['code']) ;
       }
@@ -215,6 +215,7 @@ if(!class_exists('LivecodingAuth')) {
      */
     private function sendGetRequest($data_path) {
       $this->api_req_params[2] = $this->tokens->makeAuthParam();
+
       $res = $this->get_url_contents(LCTV_API_URL.$data_path, $this->api_req_params);
 
       $res = json_decode($res);
@@ -236,7 +237,7 @@ if(!class_exists('LivecodingAuthTokens')) {
   * LivecodingAuthTokens is intended to be semi-abstract
   * Only its subclasses should be instantiated
   **/
-  class LivecodingAuthTokens {
+  abstract class LivecodingAuthTokens {
 
     /**
     * Store token data to subclass defined backend
@@ -245,9 +246,9 @@ if(!class_exists('LivecodingAuthTokens')) {
       $tokens = json_decode($tokens);
       if(!isset($tokens->error))
       {
-        $this->setAccessToken($tokens->access_token;
-        $this->setTokenType($tokens->token_type;
-        $this->setRefreshToken($tokens->refresh_token;
+        $this->setAccessToken($tokens->access_token);
+        $this->setTokenType($tokens->token_type);
+        $this->setRefreshToken($tokens->refresh_token);
         $this->setExpiresIn('Y-m-d H:i:s', (time() + $tokens->expires_in));
         $this->setScope($tokens->scope);
       }
@@ -270,35 +271,35 @@ if(!class_exists('LivecodingAuthTokens')) {
 
     // Subclasses should override these getters and setters
 
-    public function isAuthorized() {}
+    abstract public function isAuthorized();
 
-    public function getCode() {}
+    abstract public function getCode();
 
-    public function setCode() {}
+    abstract public function setCode($code);
 
-    public function getState() {}
+    abstract public function getState();
 
-    public function setState($state) {}
+    abstract public function setState($state);
 
-    private function getAccessToken() {}
+    abstract public function getAccessToken();
 
-    private function setAccessToken($access_token) {}
+    abstract public function setAccessToken($access_token);
 
-    private function getTokenType() {}
+    abstract public function getTokenType();
 
-    private function setTokenType($token_type) {}
+    abstract public function setTokenType($token_type);
 
-    private function getRefreshToken() {}
+    abstract public function getRefreshToken();
 
-    private function setRefreshToken($refresh_token) {}
+    abstract public function setRefreshToken($refresh_token);
 
-    private function getExpiresIn() {}
+    abstract public function getExpiresIn();
 
-    private function setExpiresIn($expires_in) {}
+    abstract public function setExpiresIn($expires_in);
 
-    private function getScope() {}
+    abstract public function getScope();
 
-    private function setScope($scope) {}
+    abstract public function setScope($scope);
   }
 
 } // if(!class_exists('LivecodingAuthTokens'))
@@ -321,7 +322,7 @@ if(!class_exists('LivecodingAuthTokensSession')) {
     } // isAuthorized
 
     public function getCode() {
-      return $_SESSION['code'] ;
+      return ($this->isAuthorized()) ? $_SESSION['code'] : '' ;
     } // getCode
 
     public function setCode($code) {
@@ -336,43 +337,43 @@ if(!class_exists('LivecodingAuthTokensSession')) {
       $_SESSION['state'] = $state;
     } // setState
 
-    private function getScope() {
+    public function getScope() {
       return $_SESSION['scope'];
     } // getScope
 
-    private function setScope($scope) {
+    public function setScope($scope) {
       $_SESSION['scope'] = $scope;
     } // setScope
 
-    private function getTokenType() {
+    public function getTokenType() {
       return $_SESSION['token_type'];
     } // getTokenType
 
-    private function setTokenType($token_type) {
+    public function setTokenType($token_type) {
       $_SESSION['token_type'] = $token_type;
     } // setTokenType
 
-    private function getAccessToken() {
+    public function getAccessToken() {
       return $_SESSION['access_token'];
     } // getAccessToken
 
-    private function setAccessToken($access_token) {
+    public function setAccessToken($access_token) {
       $_SESSION['access_token'] = $access_token;
     } // setAccessToken
 
-    private function getRefreshToken() {
+    public function getRefreshToken() {
       return $_SESSION['refresh_token'];
     } // getRefreshToken
 
-    private function setRefreshToken($refresh_token) {
+    public function setRefreshToken($refresh_token) {
       $_SESSION['refresh_token'] = $refresh_token;
     } // setRefreshToken
 
-    private function getExpiresIn() {
+    public function getExpiresIn() {
       return $_SESSION['expires_in'];
     } // getExpiresIn
 
-    private function setExpiresIn($expires_in) {
+    public function setExpiresIn($expires_in) {
       $_SESSION['expires_in'] = $expires_in;
     } // setExpiresIn
   } // class LivecodingAuthTokens
@@ -407,43 +408,43 @@ if(!class_exists('LivecodingAuthTokensText')) {
       file_put_contents('state', $state);
     } // setState
 
-    private function getScope() {
+    public function getScope() {
       return file_get_contents('scope');
     } // getScope
 
-    private function setScope($scope) {
+    public function setScope($scope) {
       file_put_contents('scope', $scope);
     } // setScope
 
-    private function getTokenType() {
+    public function getTokenType() {
       return file_get_contents('token_type');
     } // getTokenType
 
-    private function setTokenType($token_type) {
+    public function setTokenType($token_type) {
       file_put_contents('token_type', $token_type);
     } // setTokenType
 
-    private function getAccessToken() {
+    public function getAccessToken() {
       return file_get_contents('access_token');
     } // getAccessToken
 
-    private function setAccessToken($access_token) {
+    public function setAccessToken($access_token) {
       file_put_contents('access_token', $access_token);
     } // setAccessToken
 
-    private function getRefreshToken() {
+    public function getRefreshToken() {
       return file_get_contents('refresh_token');
     } // getRefreshToken
 
-    private function setRefreshToken($refresh_token) {
+    public function setRefreshToken($refresh_token) {
       file_put_contents('refresh_token', $refresh_token);
     } // setRefreshToken
 
-    private function getExpiresIn() {
+    public function getExpiresIn() {
       return file_get_contents('expires_in');
     } // getExpiresIn
 
-    private function setExpiresIn($expires_in) {
+    public function setExpiresIn($expires_in) {
       file_put_contents('expires_in', $expires_in);
     } // setExpiresIn
   } // class LivecodingAuthTokensText
