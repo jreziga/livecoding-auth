@@ -1,0 +1,28 @@
+{
+    "name": "jrk/livecoding-auth",
+    "type": "symfony-bundle",
+    "description": "LiveCoding PHP Auth interface",
+    "keywords": ["livecoding","sdk","api","php"],
+    "homepage": "http://github.com/jreziga/livecoding-auth",
+    "license": "GNU GPL v2",
+    "authors": [
+        {
+            "name": "Wapaca",
+            "homepage": "http://github.com/Wapaca",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.2",
+        "symfony/framework-bundle": "2.*"
+    },
+    "autoload": {
+        "psr-0": { "livecodingAuth": "" }
+    },
+    "target-dir": "Jrk/LiveCodingAuth",
+	"extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
+    }
+}
